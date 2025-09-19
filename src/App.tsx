@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
+import Debug from "./pages/Debug";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,11 @@ const App = () => (
               <Route path="/" element={
                 <Layout>
                   <Landing />
+                </Layout>
+              } />
+              <Route path="/debug" element={
+                <Layout>
+                  <Debug />
                 </Layout>
               } />
               <Route path="/dashboard" element={

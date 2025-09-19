@@ -21,8 +21,8 @@ The OpenRouter API was returning 401 errors due to missing or invalid API key co
 Set these in your Vercel dashboard (Project Settings > Environment Variables):
 
 ```
-VITE_OPENROUTER_API_KEY=sk-or-v1-your-actual-api-key-here
-VITE_OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_API_KEY=sk-or-v1-your-actual-api-key-here
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 ```
 
 ## How to Get Your OpenRouter API Key
@@ -40,7 +40,7 @@ VITE_OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 2. Select your project
 3. Go to **Settings** → **Environment Variables**
 4. Add the following variables:
-   - **Name**: `VITE_OPENROUTER_API_KEY`
+   - **Name**: `OPENROUTER_API_KEY`
    - **Value**: Your actual OpenRouter API key (starts with `sk-or-v1-`)
    - **Environment**: Production, Preview, Development (select all)
 5. Click **Save**

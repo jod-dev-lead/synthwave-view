@@ -44,10 +44,10 @@ export default function Chat() {
   // Debug environment variables on component mount
   useEffect(() => {
     console.log('🔍 Chat Component - Environment Variables Debug:');
-    console.log('VITE_OPENROUTER_API_KEY exists:', !!import.meta.env.VITE_OPENROUTER_API_KEY);
-    console.log('VITE_OPENROUTER_API_KEY length:', import.meta.env.VITE_OPENROUTER_API_KEY?.length || 0);
-    console.log('VITE_OPENROUTER_API_KEY starts with sk-or-v1:', import.meta.env.VITE_OPENROUTER_API_KEY?.startsWith('sk-or-v1-') || false);
-    console.log('VITE_OPENROUTER_BASE_URL:', import.meta.env.VITE_OPENROUTER_BASE_URL);
+    console.log('OPENROUTER_API_KEY exists:', !!import.meta.env.OPENROUTER_API_KEY);
+    console.log('OPENROUTER_API_KEY length:', import.meta.env.OPENROUTER_API_KEY?.length || 0);
+    console.log('OPENROUTER_API_KEY starts with sk-or-v1:', import.meta.env.OPENROUTER_API_KEY?.startsWith('sk-or-v1-') || false);
+    console.log('OPENROUTER_BASE_URL:', import.meta.env.OPENROUTER_BASE_URL);
   }, []);
 
   const scrollToBottom = () => {
