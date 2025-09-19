@@ -8,6 +8,7 @@ import { Layout } from "@/components/layout";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
+import Upload from "./pages/Upload";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,11 @@ const App = () => (
             <Route path="/chat" element={
               <Layout>
                 <Chat />
+              </Layout>
+            } />
+            <Route path="/upload" element={
+              <Layout>
+                <Upload />
               </Layout>
             } />
             <Route path="/settings" element={
