@@ -1,28 +1,61 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Loader2, ArrowLeft, Sparkles } from "lucide-react";
+import { Mail, Loader2, ArrowLeft, Sparkles, AlertCircle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
+  const { user, signInWithEmail, signUpWithEmail, loading } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  useEffect(() => {
+    if (user) {
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, from]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || isLoading) return;
+    if (!email.trim() || loading) return;
 
-    setIsLoading(true);
-    
-    // Simulate email sending (replace with actual Supabase auth)
-    setTimeout(() => {
+    try {
+      const { error } = activeTab === "signin" 
+        ? await signInWithEmail(email)
+        : await signUpWithEmail(email);
+
+      if (error) {
+        toast({
+          title: "Authentication Error",
+          description: error.message || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setEmailSent(true);
-      setIsLoading(false);
-    }, 2000);
+      toast({
+        title: "Check your email",
+        description: `We've sent a magic link to ${email}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (emailSent) {
@@ -88,7 +121,7 @@ export default function Auth() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "signin" | "signup")} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -105,15 +138,15 @@ export default function Auth() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      disabled={isLoading}
+                      disabled={loading}
                     />
                   </div>
                   <Button 
                     type="submit" 
                     className="w-full hover-lift" 
-                    disabled={!email.trim() || isLoading}
+                    disabled={!email.trim() || loading}
                   >
-                    {isLoading ? (
+                    {loading ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         Sending Magic Link...
@@ -144,15 +177,15 @@ export default function Auth() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      disabled={isLoading}
+                      disabled={loading}
                     />
                   </div>
                   <Button 
                     type="submit" 
                     className="w-full hover-lift" 
-                    disabled={!email.trim() || isLoading}
+                    disabled={!email.trim() || loading}
                   >
-                    {isLoading ? (
+                    {loading ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         Creating Account...

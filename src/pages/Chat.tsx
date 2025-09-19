@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User, Sparkles, MessageSquare } from "lucide-react";
+import { Send, Bot, User, Sparkles, MessageSquare, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useOpenRouter } from "@/hooks/useOpenRouter";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -25,14 +27,15 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hello! I'm your AI data assistant. I can help you analyze data, create insights, and answer questions about your analytics. What would you like to explore today?",
+      content: "Hello! I'm your AI data assistant powered by Mistral 7B. I can help you analyze data, create insights, and answer questions about your analytics. What would you like to explore today?",
       role: "assistant",
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { sendMessage, isLoading, error } = useOpenRouter();
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -59,20 +62,42 @@ export default function Chat() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input.trim();
     setInput("");
-    setIsLoading(true);
 
-    // Simulate AI response (replace with actual OpenRouter API call)
-    setTimeout(() => {
+    try {
+      // Prepare messages for AI
+      const conversationHistory = [...messages, userMessage].map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
+      const aiResponseContent = await sendMessage(conversationHistory);
+      
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: "I understand you're interested in data analysis. While I'm currently in demo mode, I would typically process your request using advanced analytics and provide detailed insights about your data trends, patterns, and recommendations. In a full implementation, I'd connect to OpenRouter's Mistral 7B model to provide intelligent responses based on your specific data context.",
+        content: aiResponseContent,
         role: "assistant",
         timestamp: new Date(),
       };
+      
       setMessages(prev => [...prev, aiResponse]);
-      setIsLoading(false);
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
+      
+      // Add error message to chat
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "I apologize, but I'm having trouble processing your request right now. Please try again in a moment.",
+        role: "assistant",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    }
   };
 
   const handleExamplePrompt = (prompt: string) => {
@@ -125,7 +150,14 @@ export default function Chat() {
               <Bot className="h-5 w-5 text-primary" />
               Conversation
               <Badge variant="secondary" className="ml-auto">
-                Demo Mode
+                {error ? (
+                  <div className="flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    Error
+                  </div>
+                ) : (
+                  "AI Powered"
+                )}
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -212,7 +244,7 @@ export default function Chat() {
         </form>
 
         <p className="text-xs text-muted-foreground text-center mt-4">
-          This is a demo interface. In production, responses would be powered by OpenRouter's Mistral 7B model.
+          Powered by OpenRouter's Mistral 7B model for intelligent data insights and analysis.
         </p>
       </div>
     </div>
