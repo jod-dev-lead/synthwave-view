@@ -42,18 +42,26 @@ export const errorLogger = {
   }
 };
 
-// Global error handler
-window.addEventListener('error', (event) => {
-  errorLogger.logError(new Error(event.message), {
-    filename: event.filename,
-    lineno: event.lineno,
-    colno: event.colno,
-  });
-});
+// Global error handler - only add if not already present
+if (typeof window !== 'undefined') {
+  const globalThis = window as any;
+  
+  if (!globalThis.hasGlobalErrorHandler) {
+    globalThis.hasGlobalErrorHandler = true;
+    
+    window.addEventListener('error', (event) => {
+      errorLogger.logError(new Error(event.message), {
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+      });
+    });
 
-// Unhandled promise rejection handler
-window.addEventListener('unhandledrejection', (event) => {
-  errorLogger.logError(new Error(`Unhandled Promise Rejection: ${event.reason}`), {
-    reason: event.reason,
-  });
-});
+    // Unhandled promise rejection handler
+    window.addEventListener('unhandledrejection', (event) => {
+      errorLogger.logError(new Error(`Unhandled Promise Rejection: ${event.reason}`), {
+        reason: event.reason,
+      });
+    });
+  }
+}
