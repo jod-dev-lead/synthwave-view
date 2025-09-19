@@ -69,7 +69,7 @@ export function useDataTransform(dataset: Dataset | null) {
         // Add aggregations
         config.aggregations.forEach(agg => {
           const alias = agg.alias || `${agg.operation}_${agg.column}`;
-          const values = rows.map(row => Number(row[agg.column])).filter(v => !isNaN(v));
+          const values = (rows as any[]).map(row => Number(row[agg.column])).filter(v => !isNaN(v));
           
           switch (agg.operation) {
             case 'sum':
@@ -79,7 +79,7 @@ export function useDataTransform(dataset: Dataset | null) {
               result[alias] = values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
               break;
             case 'count':
-              result[alias] = rows.length;
+              result[alias] = (rows as any[]).length;
               break;
             case 'min':
               result[alias] = values.length ? Math.min(...values) : 0;
