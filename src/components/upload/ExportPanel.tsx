@@ -151,7 +151,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   const saveToSupabase = useCallback(async () => {
     setIsSaving(true);
     try {
-      // Save dataset metadata and sample
+      // Prepare dataset for saving
       const datasetRecord = {
         name: dataset.name,
         columns: dataset.columns.map(col => ({
@@ -161,14 +161,20 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
         row_count: dataset.rows.length,
         sample_rows: dataset.rows.slice(0, 10), // Save first 10 rows as sample
         chart_config: chartConfig,
-        created_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase.functions.invoke('save-dataset', {
+      console.log('Saving dataset to Supabase:', datasetRecord);
+
+      const { data, error } = await supabase.functions.invoke('save-dataset', {
         body: datasetRecord,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Failed to save dataset');
+      }
+
+      console.log('Dataset saved successfully:', data);
 
       toast({
         title: "Dataset saved",
@@ -180,7 +186,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
       console.error('Save error:', error);
       toast({
         title: "Save failed",
-        description: "Could not save dataset to cloud",
+        description: error instanceof Error ? error.message : "Could not save dataset to cloud",
         variant: "destructive",
       });
     } finally {

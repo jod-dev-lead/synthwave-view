@@ -4,10 +4,12 @@ import { DataPreview } from '@/components/upload/DataPreview';
 import { ChartBuilder } from '@/components/upload/ChartBuilder';
 import { SchemaEditor } from '@/components/upload/SchemaEditor';
 import { ExportPanel } from '@/components/upload/ExportPanel';
+import { DatasetLibrary } from '@/components/DatasetLibrary';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export interface DataColumn {
   name: string;
@@ -76,6 +78,28 @@ const Upload: React.FC = () => {
     setCurrentStep(step);
   }, []);
 
+  const handleDatasetSelect = useCallback((savedDataset: any) => {
+    const restoredDataset: Dataset = {
+      name: savedDataset.name,
+      columns: savedDataset.columns,
+      rows: savedDataset.sample_rows, // Use sample rows for quick preview
+      originalFile: undefined, // No original file for saved datasets
+    };
+    
+    setDataset(restoredDataset);
+    if (savedDataset.chart_config) {
+      setChartConfig(savedDataset.chart_config);
+      setCurrentStep('chart');
+    } else {
+      setCurrentStep('preview');
+    }
+    
+    toast({
+      title: "Dataset loaded",
+      description: `Loaded "${savedDataset.name}" with ${savedDataset.row_count} rows`,
+    });
+  }, [toast]);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="text-center space-y-2">
@@ -83,96 +107,108 @@ const Upload: React.FC = () => {
         <p className="text-lg text-muted-foreground">Upload your data, explore it, and create beautiful visualizations</p>
       </div>
 
-      {/* Progress indicator */}
-      {isProcessing && (
-        <Card className="p-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Processing your data...</span>
-              <span>{processingProgress}%</span>
-            </div>
-            <Progress value={processingProgress} />
+      <Tabs defaultValue="upload" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="upload">Upload New Data</TabsTrigger>
+          <TabsTrigger value="saved">Saved Datasets</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="saved" className="space-y-6">
+          <DatasetLibrary onDatasetSelect={handleDatasetSelect} />
+        </TabsContent>
+
+        <TabsContent value="upload" className="space-y-6">{/* Progress indicator */}
+          {isProcessing && (
+            <Card className="p-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Processing your data...</span>
+                  <span>{processingProgress}%</span>
+                </div>
+                <Progress value={processingProgress} />
+              </div>
+            </Card>
+          )}
+
+          {/* Step indicators */}
+          <div className="flex justify-center space-x-4 mb-8">
+            {[
+              { key: 'upload', label: 'Upload', icon: '📁' },
+              { key: 'preview', label: 'Preview', icon: '👁️' },
+              { key: 'schema', label: 'Schema', icon: '🔧' },
+              { key: 'transform', label: 'Transform', icon: '⚙️' },
+              { key: 'chart', label: 'Chart', icon: '📊' },
+            ].map((step, index) => (
+              <div key={step.key} className="flex items-center">
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                    currentStep === step.key
+                      ? 'bg-primary text-primary-foreground'
+                      : dataset || step.key === 'upload'
+                      ? 'bg-secondary text-secondary-foreground'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  <span className="text-sm">{step.icon}</span>
+                </div>
+                <span className="ml-2 text-sm font-medium">{step.label}</span>
+                {index < 4 && <div className="w-8 h-px bg-border ml-4" />}
+              </div>
+            ))}
           </div>
-        </Card>
-      )}
 
-      {/* Step indicators */}
-      <div className="flex justify-center space-x-4 mb-8">
-        {[
-          { key: 'upload', label: 'Upload', icon: '📁' },
-          { key: 'preview', label: 'Preview', icon: '👁️' },
-          { key: 'schema', label: 'Schema', icon: '🔧' },
-          { key: 'transform', label: 'Transform', icon: '⚙️' },
-          { key: 'chart', label: 'Chart', icon: '📊' },
-        ].map((step, index) => (
-          <div key={step.key} className="flex items-center">
-            <div
-              className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                currentStep === step.key
-                  ? 'bg-primary text-primary-foreground'
-                  : dataset || step.key === 'upload'
-                  ? 'bg-secondary text-secondary-foreground'
-                  : 'bg-muted text-muted-foreground'
-              }`}
-            >
-              <span className="text-sm">{step.icon}</span>
-            </div>
-            <span className="ml-2 text-sm font-medium">{step.label}</span>
-            {index < 4 && <div className="w-8 h-px bg-border ml-4" />}
-          </div>
-        ))}
-      </div>
+          <Separator />
 
-      <Separator />
-
-      {/* Main content area */}
-      <div className="space-y-6">
-        {/* File Upload Section */}
-        {currentStep === 'upload' && (
-          <FileUpload
-            onFileProcessed={handleFileProcessed}
-            setIsProcessing={setIsProcessing}
-            setProcessingProgress={setProcessingProgress}
-          />
-        )}
-
-        {/* Data Preview Section */}
-        {dataset && currentStep === 'preview' && (
-          <DataPreview
-            dataset={dataset}
-            onNext={() => handleStepChange('schema')}
-            onBack={() => handleStepChange('upload')}
-          />
-        )}
-
-        {/* Schema Editor Section */}
-        {dataset && currentStep === 'schema' && (
-          <SchemaEditor
-            columns={dataset.columns}
-            onSchemaUpdated={handleSchemaUpdated}
-            onNext={() => handleStepChange('chart')}
-            onBack={() => handleStepChange('preview')}
-          />
-        )}
-
-        {/* Chart Builder Section */}
-        {dataset && currentStep === 'chart' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ChartBuilder
-              dataset={dataset}
-              chartConfig={chartConfig}
-              onChartConfigured={handleChartConfigured}
-            />
-            {chartConfig && (
-              <ExportPanel
-                dataset={dataset}
-                chartConfig={chartConfig}
-                onExportComplete={handleExportComplete}
+          {/* Main content area */}
+          <div className="space-y-6">
+            {/* File Upload Section */}
+            {currentStep === 'upload' && (
+              <FileUpload
+                onFileProcessed={handleFileProcessed}
+                setIsProcessing={setIsProcessing}
+                setProcessingProgress={setProcessingProgress}
               />
             )}
+
+            {/* Data Preview Section */}
+            {dataset && currentStep === 'preview' && (
+              <DataPreview
+                dataset={dataset}
+                onNext={() => handleStepChange('schema')}
+                onBack={() => handleStepChange('upload')}
+              />
+            )}
+
+            {/* Schema Editor Section */}
+            {dataset && currentStep === 'schema' && (
+              <SchemaEditor
+                columns={dataset.columns}
+                onSchemaUpdated={handleSchemaUpdated}
+                onNext={() => handleStepChange('chart')}
+                onBack={() => handleStepChange('preview')}
+              />
+            )}
+
+            {/* Chart Builder Section */}
+            {dataset && currentStep === 'chart' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ChartBuilder
+                  dataset={dataset}
+                  chartConfig={chartConfig}
+                  onChartConfigured={handleChartConfigured}
+                />
+                {chartConfig && (
+                  <ExportPanel
+                    dataset={dataset}
+                    chartConfig={chartConfig}
+                    onExportComplete={handleExportComplete}
+                  />
+                )}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

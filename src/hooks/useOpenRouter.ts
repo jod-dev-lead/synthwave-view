@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -6,7 +7,7 @@ interface Message {
 }
 
 interface UseOpenRouterReturn {
-  sendMessage: (messages: Message[]) => Promise<string>;
+  sendMessage: (messages: Message[], conversationId?: string) => Promise<string>;
   isLoading: boolean;
   error: string | null;
 }
@@ -15,26 +16,35 @@ export function useOpenRouter(): UseOpenRouterReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sendMessage = async (messages: Message[]): Promise<string> => {
+  const sendMessage = async (messages: Message[], conversationId?: string): Promise<string> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // For demo purposes, we'll simulate an AI response
-      // In production, replace this with actual OpenRouter API call
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+      console.log('Sending messages to AI chat function:', messages);
 
-      const responses = [
-        "Based on your data analysis request, I can see several interesting trends. Your monthly revenue shows strong growth with some seasonal variations. The key metrics indicate a positive trajectory, particularly in user acquisition and retention rates.",
-        "I've analyzed the patterns in your dataset. The conversion metrics suggest opportunities for optimization in your funnel. Consider focusing on the mid-funnel stages where we see the highest drop-off rates.",
-        "Looking at your analytics data, there are clear correlations between user engagement and revenue performance. I recommend implementing A/B tests on your high-traffic pages to maximize conversion potential.",
-        "The data visualization reveals some compelling insights about user behavior. Peak usage occurs during specific hours, which could inform your content scheduling and resource allocation strategies.",
-        "Your revenue forecast looks promising based on historical trends. The growth patterns suggest continued expansion, though I'd recommend monitoring the leading indicators we discussed for early trend detection."
-      ];
+      const { data, error: functionError } = await supabase.functions.invoke('ai-chat', {
+        body: { 
+          messages: messages,
+          conversationId: conversationId 
+        },
+      });
 
-      return responses[Math.floor(Math.random() * responses.length)];
+      if (functionError) {
+        console.error('Edge function error:', functionError);
+        throw new Error(functionError.message || 'Failed to get AI response');
+      }
+
+      if (!data || !data.message) {
+        throw new Error('Invalid response from AI service');
+      }
+
+      console.log('Received AI response:', data.message);
+      return data.message;
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      console.error('OpenRouter hook error:', errorMessage);
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
