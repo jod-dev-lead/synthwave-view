@@ -20,10 +20,11 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8" aria-label="Global">
         <div className="flex lg:flex-1">
-          <Link to="/" className="-m-1.5 p-1.5">
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+          <Link to="/" className="-m-1.5 p-1.5 group">
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent hover-wiggle inline-block">
               DataVision AI
             </span>
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-chart-2 rounded-full animate-pulse-soft opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </Link>
         </div>
         
@@ -39,21 +40,27 @@ export function Header() {
         </div>
         
         <div className="hidden lg:flex lg:gap-x-8">
-          {navigation.map((item) => {
+          {navigation.map((item, index) => {
             const Icon = item.icon;
             return (
               <Link
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
+                  "flex items-center gap-2 text-sm font-medium transition-all duration-300 hover:text-primary hover-rotate relative group",
                   location.pathname === item.href
                     ? "text-primary"
                     : "text-muted-foreground"
                 )}
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <Icon className="h-4 w-4" />
-                {item.name}
+                <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                <span className="relative">
+                  {item.name}
+                  {location.pathname === item.href && (
+                    <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary-glow rounded-full animate-pulse-soft"></div>
+                  )}
+                </span>
               </Link>
             );
           })}
@@ -70,7 +77,12 @@ export function Header() {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
-          <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-border">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm" 
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-border shadow-custom-lg">
             <div className="flex items-center justify-between">
               <Link to="/" className="-m-1.5 p-1.5">
                 <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">

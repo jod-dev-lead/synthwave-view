@@ -9,15 +9,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary-hover shadow-custom-sm hover:shadow-custom-md",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary-hover",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "bg-primary text-primary-foreground hover:bg-primary-hover shadow-custom-sm hover:shadow-custom-md hover-lift",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-custom-sm hover:shadow-custom-md",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-primary/50 hover-lift",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary-hover shadow-custom-sm hover:shadow-custom-md hover-lift",
+        ghost: "hover:bg-accent hover:text-accent-foreground hover-lift",
+        link: "text-primary underline-offset-4 hover:underline hover:text-primary-hover",
         hero: "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground hover:shadow-glow hover:scale-105 font-semibold transition-bounce",
-        dashboard: "bg-card text-card-foreground border border-border hover:bg-accent hover:text-accent-foreground hover-lift",
-        premium: "bg-gradient-to-r from-chart-2 to-chart-5 text-white hover:shadow-glow hover:scale-105 font-semibold",
+        dashboard: "bg-card text-card-foreground border border-border hover:bg-accent hover:text-accent-foreground hover:border-primary/50 hover-lift",
+        premium: "bg-gradient-to-r from-chart-2 to-chart-5 text-white hover:shadow-glow hover:scale-105 font-semibold transition-bounce",
       },
       size: {
         default: "h-10 px-4 py-2",
