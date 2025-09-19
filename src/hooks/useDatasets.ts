@@ -30,9 +30,10 @@ export function useDatasets() {
         throw new Error(functionError.message || 'Failed to fetch datasets');
       }
 
-      setDatasets(data.datasets || []);
+      setDatasets(data?.datasets || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch datasets';
+      console.error('Fetch datasets error:', err);
       setError(errorMessage);
       toast({
         title: "Error loading datasets",
@@ -60,6 +61,7 @@ export function useDatasets() {
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete dataset';
+      console.error('Delete dataset error:', err);
       toast({
         title: "Delete failed",
         description: errorMessage,

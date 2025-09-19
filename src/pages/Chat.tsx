@@ -66,13 +66,17 @@ export default function Chat() {
     setInput("");
 
     try {
-      // Prepare messages for AI
+      // Prepare messages for AI with better error handling
       const conversationHistory = [...messages, userMessage].map(msg => ({
         role: msg.role,
         content: msg.content
       }));
 
       const aiResponseContent = await sendMessage(conversationHistory);
+      
+      if (!aiResponseContent) {
+        throw new Error('No response received from AI');
+      }
       
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -83,9 +87,10 @@ export default function Chat() {
       
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
+      console.error('Chat error:', error);
       toast({
         title: "Error",
-        description: "Failed to get AI response. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to get AI response. Please try again.",
         variant: "destructive",
       });
       
@@ -232,11 +237,13 @@ export default function Chat() {
             placeholder="Ask about your data, request analysis, or explore insights..."
             disabled={isLoading}
             className="flex-1"
+            maxLength={500}
           />
           <Button 
             type="submit" 
             disabled={!input.trim() || isLoading}
             className="hover-lift"
+            aria-label="Send message"
           >
             <Send className="h-4 w-4" />
             <span className="sr-only">Send message</span>

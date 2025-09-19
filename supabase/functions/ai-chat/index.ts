@@ -55,7 +55,10 @@ serve(async (req) => {
 
     console.log('Sending request to OpenRouter with messages:', messages);
 
-    // Call OpenRouter API
+    // Call OpenRouter API with timeout and better error handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -78,18 +81,33 @@ serve(async (req) => {
         frequency_penalty: 0.1,
         presence_penalty: 0.1,
       }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenRouter API error:', response.status, errorText);
       return new Response(
-        JSON.stringify({ error: `OpenRouter API error: ${response.status}` }),
+        JSON.stringify({ 
+          error: `OpenRouter API error: ${response.status}`,
+          details: errorText 
+        }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Invalid OpenRouter response structure:', data);
+      return new Response(
+        JSON.stringify({ error: 'Invalid response from AI service' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const aiMessage = data.choices[0].message.content;
 
     console.log('Received response from OpenRouter:', aiMessage);

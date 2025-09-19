@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDatasets } from "@/hooks/useDatasets";
+import { SEOHead } from "@/components/SEOHead";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { 
   BarChart3, 
   TrendingUp, 
@@ -85,6 +87,14 @@ const stats = [
 export default function Dashboard() {
   const { datasets, loading } = useDatasets();
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Loading your dashboard..." />
+      </div>
+    );
+  }
+
   const stats = [
     {
       title: "Total Datasets",
@@ -118,6 +128,11 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <SEOHead 
+        title="Analytics Dashboard - DataVision AI"
+        description="Monitor your datasets and visualizations performance with real-time analytics and insights."
+        keywords="analytics dashboard, data monitoring, visualization performance, business intelligence"
+      />
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

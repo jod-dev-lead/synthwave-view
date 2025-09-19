@@ -29,30 +29,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (event === 'SIGNED_IN') {
-          toast({
-            title: "Welcome back!",
-            description: "You have successfully signed in.",
-          });
-        } else if (event === 'SIGNED_OUT') {
-          toast({
-            title: "Signed out",
-            description: "You have been signed out successfully.",
-          });
-        }
+        // Only show toasts after initial load to avoid showing them on page refresh
+        setTimeout(() => {
+          if (event === 'SIGNED_IN') {
+            toast({
+              title: "Welcome back!",
+              description: "You have successfully signed in.",
+            });
+          } else if (event === 'SIGNED_OUT') {
+            toast({
+              title: "Signed out",
+              description: "You have been signed out successfully.",
+            });
+          }
+        }, 100);
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // THEN get initial session
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting session:', error);
+      }
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch((error) => {
+      console.error('Error in getSession:', error);
       setLoading(false);
     });
 
@@ -60,34 +69,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [toast]);
 
   const signInWithEmail = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectUrl
-      }
-    });
-    
-    return { error };
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
+      });
+      
+      return { error };
+    } catch (error) {
+      console.error('Sign in error:', error);
+      return { error: error instanceof Error ? error : new Error('Sign in failed') };
+    }
   };
 
   const signUpWithEmail = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password: Math.random().toString(36), // Random password for magic link
-      options: {
-        emailRedirectTo: redirectUrl
-      }
-    });
-    
-    return { error };
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password: Math.random().toString(36), // Random password for magic link
+        options: {
+          emailRedirectTo: redirectUrl
+        }
+      });
+      
+      return { error };
+    } catch (error) {
+      console.error('Sign up error:', error);
+      return { error: error instanceof Error ? error : new Error('Sign up failed') };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const value = {
