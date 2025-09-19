@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,8 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 import { 
   User, 
   Mail, 
@@ -22,9 +20,7 @@ import {
 } from "lucide-react";
 
 export default function Settings() {
-  const { user, signOut } = useAuth();
-  const { toast } = useToast();
-  const [displayName, setDisplayName] = useState("");
+  const [email] = useState("user@example.com");
   const [notifications, setNotifications] = useState({
     email: true,
     dashboard: false,
@@ -32,63 +28,9 @@ export default function Settings() {
     security: true,
   });
 
-  useEffect(() => {
-    // Load saved settings from localStorage
-    const savedNotifications = localStorage.getItem('notifications');
-    if (savedNotifications) {
-      setNotifications(JSON.parse(savedNotifications));
-    }
-    
-    const savedDisplayName = localStorage.getItem('displayName');
-    if (savedDisplayName) {
-      setDisplayName(savedDisplayName);
-    }
-  }, []);
-
   const handleSave = () => {
-    // Save to localStorage
-    localStorage.setItem('notifications', JSON.stringify(notifications));
-    localStorage.setItem('displayName', displayName);
-    
-    toast({
-      title: "Settings saved",
-      description: "Your preferences have been updated successfully.",
-    });
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleExportData = () => {
-    const data = {
-      user: user?.email,
-      settings: { notifications, displayName },
-      exportDate: new Date().toISOString(),
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'my-data.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Data exported",
-      description: "Your data has been downloaded as a JSON file.",
-    });
+    // Simulate save
+    console.log("Settings saved");
   };
 
   return (
@@ -130,7 +72,7 @@ export default function Settings() {
                     <Input
                       id="email"
                       type="email"
-                      value={user?.email || ""}
+                      value={email}
                       disabled
                       className="flex-1"
                     />
@@ -146,13 +88,12 @@ export default function Settings() {
                   <Input
                     id="name"
                     placeholder="Enter your display name"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
+                    defaultValue=""
                   />
                 </div>
 
                 <div className="flex items-center justify-between pt-4">
-                  <Button variant="outline" onClick={handleSignOut}>
+                  <Button variant="outline">
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </Button>
@@ -343,17 +284,11 @@ export default function Settings() {
                 <div className="space-y-4">
                   <h4 className="font-medium">Data Management</h4>
                   <div className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start" onClick={handleExportData}>
+                    <Button variant="outline" className="w-full justify-start">
                       <Download className="h-4 w-4 mr-2" />
                       Export My Data
                     </Button>
-                    <Button variant="destructive" className="w-full justify-start" onClick={() => {
-                      toast({
-                        title: "Feature not available",
-                        description: "Account deletion is not available in this demo.",
-                        variant: "destructive",
-                      });
-                    }}>
+                    <Button variant="destructive" className="w-full justify-start">
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete Account
                     </Button>

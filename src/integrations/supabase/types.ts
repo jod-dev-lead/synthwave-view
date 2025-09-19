@@ -14,72 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      chat_conversations: {
-        Row: {
-          created_at: string
-          id: string
-          messages: Json
-          title: string
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          messages?: Json
-          title?: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          messages?: Json
-          title?: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      datasets: {
-        Row: {
-          chart_config: Json | null
-          columns: Json
-          created_at: string
-          file_url: string | null
-          id: string
-          name: string
-          row_count: number
-          sample_rows: Json
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          chart_config?: Json | null
-          columns: Json
-          created_at?: string
-          file_url?: string | null
-          id?: string
-          name: string
-          row_count?: number
-          sample_rows?: Json
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          chart_config?: Json | null
-          columns?: Json
-          created_at?: string
-          file_url?: string | null
-          id?: string
-          name?: string
-          row_count?: number
-          sample_rows?: Json
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never

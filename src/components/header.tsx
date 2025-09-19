@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, BarChart3, MessageSquare, Home, Settings, Upload, LogIn, User } from "lucide-react";
+import { Menu, X, BarChart3, MessageSquare, Home, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
-  { name: "Upload", href: "/upload", icon: Upload },
   { name: "AI Chat", href: "/chat", icon: MessageSquare },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
@@ -17,7 +15,6 @@ const navigation = [
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { user } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -42,19 +39,7 @@ export function Header() {
         </div>
         
         <div className="hidden lg:flex lg:gap-x-8">
-          <Link
-            to="/"
-            className={cn(
-              "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
-              location.pathname === "/"
-                ? "text-primary"
-                : "text-muted-foreground"
-            )}
-          >
-            <Home className="h-4 w-4" />
-            Home
-          </Link>
-          {user && navigation.map((item) => {
+          {navigation.map((item) => {
             const Icon = item.icon;
             return (
               <Link
@@ -76,21 +61,9 @@ export function Header() {
         
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-4">
           <ThemeToggle />
-          {user ? (
-            <Button asChild variant="outline" className="hover-lift">
-              <Link to="/settings">
-                <User className="h-4 w-4 mr-2" />
-                Profile
-              </Link>
-            </Button>
-          ) : (
-            <Button asChild variant="default" className="hover-lift">
-              <Link to="/auth">
-                <LogIn className="h-4 w-4 mr-2" />
-                Sign In
-              </Link>
-            </Button>
-          )}
+          <Button asChild variant="default" className="hover-lift">
+            <Link to="/auth">Sign In</Link>
+          </Button>
         </div>
       </nav>
       
@@ -116,20 +89,7 @@ export function Header() {
             <div className="mt-6 flow-root">
               <div className="-my-6 divide-y divide-border">
                 <div className="space-y-2 py-6">
-                  <Link
-                    to="/"
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium transition-colors hover:bg-accent",
-                      location.pathname === "/"
-                        ? "bg-accent text-accent-foreground"
-                        : "text-foreground"
-                    )}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Home className="h-5 w-5" />
-                    Home
-                  </Link>
-                  {user && navigation.map((item) => {
+                  {navigation.map((item) => {
                     const Icon = item.icon;
                     return (
                       <Link
@@ -151,21 +111,11 @@ export function Header() {
                 </div>
                 <div className="py-6 flex items-center justify-between">
                   <ThemeToggle />
-                  {user ? (
-                    <Button asChild variant="outline" className="hover-lift">
-                      <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
-                        <User className="h-4 w-4 mr-2" />
-                        Profile
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button asChild variant="default" className="hover-lift">
-                      <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                        <LogIn className="h-4 w-4 mr-2" />
-                        Sign In
-                      </Link>
-                    </Button>
-                  )}
+                  <Button asChild variant="default" className="hover-lift">
+                    <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                      Sign In
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
