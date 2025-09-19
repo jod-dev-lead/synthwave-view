@@ -41,6 +41,15 @@ export default function Chat() {
   const [error, setError] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // Debug environment variables on component mount
+  useEffect(() => {
+    console.log('🔍 Chat Component - Environment Variables Debug:');
+    console.log('VITE_OPENROUTER_API_KEY exists:', !!import.meta.env.VITE_OPENROUTER_API_KEY);
+    console.log('VITE_OPENROUTER_API_KEY length:', import.meta.env.VITE_OPENROUTER_API_KEY?.length || 0);
+    console.log('VITE_OPENROUTER_API_KEY starts with sk-or-v1:', import.meta.env.VITE_OPENROUTER_API_KEY?.startsWith('sk-or-v1-') || false);
+    console.log('VITE_OPENROUTER_BASE_URL:', import.meta.env.VITE_OPENROUTER_BASE_URL);
+  }, []);
+
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
       const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
